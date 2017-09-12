@@ -32,7 +32,8 @@ defmodule CodeCorps.Factories do
   def github_app_installation_factory do
     %CodeCorps.GithubAppInstallation{
       project: build(:project),
-      user: build(:user)
+      user: build(:user),
+      github_id: sequence(:id, (fn number -> number end))
     }
   end
 
@@ -41,7 +42,9 @@ defmodule CodeCorps.Factories do
   end
 
   def github_repo_factory do
-    %CodeCorps.GithubRepo{}
+    %CodeCorps.GithubRepo{
+      github_app_installation: build(:github_app_installation)
+    }
   end
 
   def organization_factory do

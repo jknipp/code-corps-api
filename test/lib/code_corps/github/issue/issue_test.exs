@@ -44,7 +44,7 @@ defmodule CodeCorps.GitHub.IssueTest do
         "https://api.github.com/repos/foo/bar/issues",
         [
           {"Accept", "application/vnd.github.machine-man-preview+json"},
-          {"Authorization", "Bearer" <> _jwt}
+          {"Authorization", "token" <> _tok}
         ],
         body,
         _options
@@ -67,7 +67,7 @@ defmodule CodeCorps.GitHub.IssueTest do
         "https://api.github.com/repos/foo/bar/issues",
         [
           {"Accept", "application/vnd.github.machine-man-preview+json"},
-          {"Authorization", "Bearer" <> _jwt}
+          {"Authorization", "token" <> _tok}
         ],
         body,
         _options
@@ -111,7 +111,7 @@ defmodule CodeCorps.GitHub.IssueTest do
         "https://api.github.com/repos/foo/bar/issues/5",
         [
           {"Accept", "application/vnd.github.machine-man-preview+json"},
-          {"Authorization", "Bearer" <> _jwt}
+          {"Authorization", "token" <> _tok}
         ],
         body,
         _options
@@ -134,7 +134,7 @@ defmodule CodeCorps.GitHub.IssueTest do
         "https://api.github.com/repos/foo/bar/issues/5",
         [
           {"Accept", "application/vnd.github.machine-man-preview+json"},
-          {"Authorization", "Bearer" <> _jwt}
+          {"Authorization", "token" <> _tok}
         ],
         body,
         _options

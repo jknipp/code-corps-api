@@ -1,4 +1,6 @@
 defmodule CodeCorps.Task.ServiceTest do
+  @moduledoc false
+
   use CodeCorps.DbAccessCase
 
   import CodeCorps.GitHub.TestHelpers
@@ -76,7 +78,6 @@ defmodule CodeCorps.Task.ServiceTest do
         |> insert(github_account_login: "foo", name: "bar")
 
       insert(:project_github_repo, project: project, github_repo: github_repo)
-
 
       with_mock_api(CodeCorps.GitHub.FailureAPI) do
         assert {:error, :github} ==

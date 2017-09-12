@@ -29,13 +29,18 @@ defmodule CodeCorps.GitHub.Event.IssueCommentTest do
       @event build(:github_event, action: action, type: "issue_comment")
 
       test "with unmatched both users, passes with no changes made if no matching projects" do
-        %{"repository" => %{"id" => repo_github_id}} = @payload
+        %{
+          "issue" => %{"user" => %{"id" => issue_user_github_id}},
+          "comment" => %{"user" => %{"id" => comment_user_github_id}},
+          "repository" => %{"id" => repo_github_id}
+        } = @payload
 
         insert(:github_repo, github_id: repo_github_id)
         assert IssueComment.handle(@event, @payload) == {:ok, []}
         assert Repo.aggregate(Task, :count, :id) == 0
         assert Repo.aggregate(Comment, :count, :id) == 0
-        refute Repo.one(User)
+        refute Repo.get_by(User, github_id: issue_user_github_id)
+        refute Repo.get_by(User, github_id: comment_user_github_id)
       end
 
       test "with unmatched both users, creates users, creates missing tasks, missing comments, for all projects connected with the github repo" do

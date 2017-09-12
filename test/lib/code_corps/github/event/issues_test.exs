@@ -27,12 +27,17 @@ defmodule CodeCorps.GitHub.Event.IssuesTest do
     @event build(:github_event, action: "opened", type: "issues")
 
     test "with unmatched user, passes with no changes made if no matching projects" do
-      %{"repository" => %{"id" => repo_github_id}} = @payload
+      %{
+        "issue" => %{
+          "user" => %{"id" => user_github_id}
+        },
+        "repository" => %{"id" => repo_github_id}
+      } = @payload
 
       insert(:github_repo, github_id: repo_github_id)
       assert Issues.handle(@event, @payload) == {:ok, []}
       assert Repo.aggregate(Task, :count, :id) == 0
-      refute Repo.one(User)
+      refute Repo.get_by(User, github_id: user_github_id)
     end
 
     test "with unmatched user, creates user, creates task for each project associated to github repo" do
@@ -158,12 +163,15 @@ defmodule CodeCorps.GitHub.Event.IssuesTest do
     @event build(:github_event, action: "closed", type: "issues")
 
     test "with unmatched user, passes with no changes made if no matching projects" do
-      %{"repository" => %{"id" => repo_github_id}} = @payload
+      %{
+        "issue" => %{"user" => %{"id" => user_github_id}},
+        "repository" => %{"id" => repo_github_id}
+      } = @payload
 
       insert(:github_repo, github_id: repo_github_id)
       assert Issues.handle(@event, @payload) == {:ok, []}
       assert Repo.aggregate(Task, :count, :id) == 0
-      refute Repo.one(User)
+      refute Repo.get_by(User, github_id: user_github_id)
     end
 
     test "with unmatched user, creates user, creates task for each project associated to github repo" do
@@ -289,12 +297,15 @@ defmodule CodeCorps.GitHub.Event.IssuesTest do
     @event build(:github_event, action: "edited", type: "issues")
 
     test "with unmatched user, passes with no changes made if no matching projects" do
-      %{"repository" => %{"id" => repo_github_id}} = @payload
+      %{
+        "issue" => %{"user" => %{"id" => user_github_id}},
+        "repository" => %{"id" => repo_github_id}
+      } = @payload
 
       insert(:github_repo, github_id: repo_github_id)
       assert Issues.handle(@event, @payload) == {:ok, []}
       assert Repo.aggregate(Task, :count, :id) == 0
-      refute Repo.one(User)
+      refute Repo.get_by(User, github_id: user_github_id)
     end
 
     test "with unmatched user, creates user, creates task for each project associated to github repo" do
@@ -420,12 +431,15 @@ defmodule CodeCorps.GitHub.Event.IssuesTest do
     @event build(:github_event, action: "reopened", type: "issues")
 
     test "with unmatched user, passes with no changes made if no matching projects" do
-      %{"repository" => %{"id" => repo_github_id}} = @payload
+      %{
+        "issue" => %{"user" => %{"id" => user_github_id}},
+        "repository" => %{"id" => repo_github_id}
+      } = @payload
 
       insert(:github_repo, github_id: repo_github_id)
       assert Issues.handle(@event, @payload) == {:ok, []}
       assert Repo.aggregate(Task, :count, :id) == 0
-      refute Repo.one(User)
+      refute Repo.get_by(User, github_id: user_github_id)
     end
 
     test "with unmatched user, creates user, creates task for each project associated to github repo" do

@@ -1,42 +1,61 @@
 defmodule CodeCorps.GitHub.Issue do
+  @moduledoc ~S"""
+  In charge of performing actions on the Issue endpoint of the github API
+  """
 
-  alias CodeCorps.{GitHub, GithubRepo, Task, User}
+  alias CodeCorps.{GitHub, GithubRepo, GithubAppInstallation, Task, User}
 
   @spec create(Task.t) :: GitHub.response
   def create(%Task{
-    github_repo: %GithubRepo{} = github_repo,
+    github_repo: %GithubRepo{
+      github_app_installation: %GithubAppInstallation{} = installation
+    } = github_repo,
     user: %User{} = user
     } = task) do
 
-    endpoint = github_repo |> get_repo_endpoint()
+    endpoint = github_repo |> get_endpoint()
     attrs = task |> GitHub.Adapters.Task.to_issue
 
-    make_request(user, :post, endpoint, attrs)
+    with opts when is_list(opts) <- opts_for(user, installation) do
+      GitHub.request(:post, endpoint, %{}, attrs, opts)
+    else
+      {:error, github_error} -> {:error, github_error}
+    end
   end
 
   @spec update(Task.t) :: GitHub.response
   def update(%Task{
-    github_repo: %GithubRepo{} = github_repo,
+    github_repo: %GithubRepo{
+      github_app_installation: %GithubAppInstallation{} = installation
+    } = github_repo,
     user: %User{} = user,
     github_issue_number: number
     } = task) do
 
-    endpoint = "#{github_repo |> get_repo_endpoint()}/#{number}"
+    endpoint = "#{github_repo |> get_endpoint()}/#{number}"
     attrs = task |> GitHub.Adapters.Task.to_issue
 
-    make_request(user, :patch, endpoint, attrs)
+    with opts when is_list(opts) <- opts_for(user, installation) do
+      GitHub.request(:patch, endpoint, %{}, attrs, opts)
+    else
+      {:error, github_error} -> {:error, github_error}
+    end
   end
 
-  @spec get_repo_endpoint(GithubRepo.t) :: String.t
-  defp get_repo_endpoint(%GithubRepo{github_account_login: owner, name: repo}) do
+  @spec get_endpoint(GithubRepo.t) :: String.t
+  defp get_endpoint(%GithubRepo{github_account_login: owner, name: repo}) do
     "/repos/#{owner}/#{repo}/issues"
   end
 
-  @spec make_request(User.t, atom, String.t, map) :: GitHub.response
-  defp make_request(%User{github_auth_token: nil}, method, endpoint, %{} = attrs) do
-    GitHub.integration_request(method, endpoint, %{}, attrs, [])
+  @spec opts_for(User.t, GithubAppInstallation.t) :: list
+  defp opts_for(%User{github_auth_token: nil}, %GithubAppInstallation{} = installation) do
+    with {:ok, token} <- installation |> GitHub.Installation.get_access_token do
+      [access_token: token]
+    else
+      {:error, github_error} -> {:error, github_error}
+    end
   end
-  defp make_request(%User{github_auth_token: token}, method, endpoint, %{} = attrs) do
-    GitHub.request(method, endpoint, %{}, attrs, [access_token: token])
+  defp opts_for(%User{github_auth_token: token}, %GithubAppInstallation{}) do
+    [access_token: token]
   end
 end

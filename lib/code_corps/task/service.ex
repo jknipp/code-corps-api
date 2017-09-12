@@ -32,10 +32,12 @@ defmodule CodeCorps.Task.Service do
   defp marshall_result({:error, :task, %Changeset{} = changeset, _steps}), do: {:error, changeset}
   defp marshall_result({:error, :github, _value, _steps}), do: {:error, :github}
 
+  @preloads [[github_repo: :github_app_installation], :user]
+
   @spec connect_to_github(Task.t) :: {:ok, Task.t} :: {:error, GitHub.api_error_struct}
   defp connect_to_github(%Task{github_repo_id: nil} = task), do: {:ok, task}
   defp connect_to_github(%Task{github_repo_id: _} = task) do
-    with {:ok, issue} <- task |> Repo.preload([:github_repo, :user]) |> GitHub.Issue.create do
+    with {:ok, issue} <- task |> Repo.preload(@preloads) |> GitHub.Issue.create do
       task |> link_with_github_changeset(issue) |> Repo.update
     else
       {:error, github_error} -> {:error, github_error}
@@ -50,7 +52,7 @@ defmodule CodeCorps.Task.Service do
   @spec sync_to_github(Task.t) :: {:ok, Task.t} :: {:error, GitHub.api_error_struct}
   defp sync_to_github(%Task{github_repo_id: nil} = task), do: {:ok, task}
   defp sync_to_github(%Task{github_repo_id: _} = task) do
-    with {:ok, _issue} <- task |> Repo.preload([:github_repo, :user]) |> GitHub.Issue.update do
+    with {:ok, _issue} <- task |> Repo.preload(@preloads) |> GitHub.Issue.update do
       {:ok, task}
     else
       {:error, github_error} -> {:error, github_error}
