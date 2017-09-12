@@ -1,4 +1,8 @@
 defmodule CodeCorps.Policy.Task do
+  @moduledoc ~S"""
+  Authorization policy in charge of dermining if a `User` is authorized to
+  perform an action on a `Task`.
+  """
   import CodeCorps.Policy.Helpers,
     only: [get_project: 1, administered_by?: 2, task_authored_by?: 2]
 
